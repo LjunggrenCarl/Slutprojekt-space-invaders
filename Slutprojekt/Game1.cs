@@ -37,6 +37,8 @@ namespace Slutprojekt
         Vector2 Spacepos = new Vector2(0, 0);
         Vector2 Spacepos2 = new Vector2(0, -1200);
 
+        Texture2D Lives;
+
         MouseState mus = Mouse.GetState();
         MouseState gammalMus = Mouse.GetState();
 
@@ -77,6 +79,9 @@ namespace Slutprojekt
         int Tiefightershot;
         int greenshotspeed = 16;
 
+        //lives
+        int Shiplives = 3;
+        List<Rectangle> XwingRectangleLives = new List<Rectangle>();
 
         public Game1()
         {
@@ -101,6 +106,14 @@ namespace Slutprojekt
                 {
                     tiefighterPositioner.Add(new Rectangle(200 + 120 * x, 200 + 120 * y, 64, 64));
                 }
+            }
+
+            //lives
+            for (int a = 0; a < Shiplives; a++)
+            {
+
+                XwingRectangleLives.Add(new Rectangle((windowWidth - 60 - (a * 50)), 25, 40, 40));
+
             }
 
             //mus
@@ -155,6 +168,9 @@ namespace Slutprojekt
             greenshot = Content.Load<Texture2D>("greenshot");
             greenshotrect = new Rectangle(-100, -100, Shot.Width * 1, Shot.Height * 1);
 
+            //lives
+            Lives = Content.Load<Texture2D>("Heart");
+
             //text
             arialFont = Content.Load<SpriteFont>("File");
 
@@ -180,11 +196,14 @@ namespace Slutprojekt
                     break;
                 case 1:
                     Updategame();
+                    Updatemenu();
                     break;
                 case 2:
-                    Updateending();
+                    Updateloseending();
                     break;
-
+                case 3:
+                    Updatewinending();
+                    break;
             }
 
             base.Update(gameTime);
@@ -202,7 +221,10 @@ namespace Slutprojekt
                     Drawgame();
                     break;
                 case 2:
-                    Drawending();
+                    Drawloseending();
+                    break;
+                case 3:
+                    Drawwinending();
                     break;
             }
 
@@ -260,6 +282,12 @@ namespace Slutprojekt
                 SwitchScene(1);
             }
 
+            if (Shiplives == 0)
+            {
+
+                SwitchScene(2);
+
+            }
         }
 
 
@@ -322,7 +350,9 @@ namespace Slutprojekt
             if (greenshotrect.Intersects(xwingRectangle) == true)
             {
 
-                SwitchScene(2);
+                greenshotrect = new Rectangle(-100, -100, Shot.Width * 1, Shot.Height * 1);
+                Shiplives--;
+                XwingRectangleLives.RemoveAt(Shiplives);
 
             }
 
@@ -472,7 +502,14 @@ namespace Slutprojekt
             moveYtimer++;
         }
 
-        void Updateending()
+        void Updateloseending()
+        {
+
+
+
+        }
+
+        void Updatewinending()
         {
 
 
@@ -513,11 +550,16 @@ namespace Slutprojekt
                 _spriteBatch.Draw(tiefigtherbild, tiefighterRectangle, Color.White);
             }
 
+            foreach (Rectangle space in XwingRectangleLives)
+            {
+                _spriteBatch.Draw(Lives, space, Color.LightBlue);
+            }
+
             _spriteBatch.End();
 
         }
 
-        void Drawending()
+        void Drawloseending()
         {
 
             GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -528,6 +570,21 @@ namespace Slutprojekt
             _spriteBatch.Draw(Spacebild2, Spacepos2, Color.White);
 
             _spriteBatch.End();
+
+        }
+
+        void Drawwinending()
+        {
+
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            _spriteBatch.Begin();
+
+            _spriteBatch.Draw(Spacebild, Spacepos, Color.White);
+            _spriteBatch.Draw(Spacebild2, Spacepos2, Color.White);
+
+            _spriteBatch.End();
+
 
         }
     }

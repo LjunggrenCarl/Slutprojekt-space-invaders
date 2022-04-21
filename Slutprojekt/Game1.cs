@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
-using System.Threading;
 using System;
 
 namespace Slutprojekt
@@ -25,6 +24,12 @@ namespace Slutprojekt
         Texture2D knappbild;
         Rectangle knapprect;
 
+        Texture2D Yesknappbild;
+        Rectangle Yesknapprect;
+
+        Texture2D Noknappbild;
+        Rectangle Noknapprect;
+
         Texture2D loga;
         Rectangle logarect;
 
@@ -33,6 +38,9 @@ namespace Slutprojekt
 
         Texture2D greenshot;
         Rectangle greenshotrect;
+
+        Texture2D GameOver;
+        Rectangle GameOverRect;
 
         Vector2 Spacepos = new Vector2(0, 0);
         Vector2 Spacepos2 = new Vector2(0, -1200);
@@ -56,7 +64,7 @@ namespace Slutprojekt
         int xwingspeed = 10;
 
         //shoting
-        int shotspeed = 12;
+        int shotspeed = 50;
         bool shots = false;
 
         //score
@@ -65,9 +73,9 @@ namespace Slutprojekt
         Vector2 meddelandePosition = new Vector2(20, 20);
 
         //tiefigthermove
-        int moveX = 20;
+        int moveX = 15;
         int moveXtimer = 0;
-        int moveY = 20;
+        int moveY = 15;
         bool TiefighterY = false;
         int moveYtimer = 0;
         
@@ -77,7 +85,19 @@ namespace Slutprojekt
 
         //shoting teifitghter
         int Tiefightershot;
-        int greenshotspeed = 16;
+        int greenshotspeed = 8;
+
+        //levels
+        int Showlevel = 1;
+        int level = 2;
+        SpriteFont arialFontlevel;
+        string levelmeddelande = $"Level:";
+        Vector2 LevelPosition = new Vector2(900, 20);
+
+        //Play again
+        SpriteFont arialFontPlayagain;
+        string Playagainmeddelande = $"Play Again?";
+        Vector2 PlayagainPosition = new Vector2(875, 620);
 
         //lives
         int Shiplives = 3;
@@ -168,11 +188,26 @@ namespace Slutprojekt
             greenshot = Content.Load<Texture2D>("greenshot");
             greenshotrect = new Rectangle(-100, -100, Shot.Width * 1, Shot.Height * 1);
 
+            GameOver = Content.Load<Texture2D>("Game Over");
+            GameOverRect = new Rectangle(windowWidth  / 2 - GameOver.Width/2, windowHeight / 2 - GameOver.Height / 2 - 200, GameOver.Width * 1, GameOver.Height * 1);
+
+            //yes knapp
+            Yesknappbild = Content.Load<Texture2D>("Yes button");
+            Yesknapprect = new Rectangle(600, 900, Yesknappbild.Width * 1, Yesknappbild.Height * 1);
+
+            //no knapp
+            Noknappbild = Content.Load<Texture2D>("No button");
+            Noknapprect = new Rectangle(1030, 900, Noknappbild.Width * 1, Noknappbild.Height * 1);
+
             //lives
             Lives = Content.Load<Texture2D>("Heart");
 
             //text
             arialFont = Content.Load<SpriteFont>("File");
+
+            arialFontlevel = Content.Load<SpriteFont>("File");
+
+            arialFontPlayagain = Content.Load<SpriteFont>("File");
 
         }
 
@@ -201,9 +236,7 @@ namespace Slutprojekt
                 case 2:
                     Updateloseending();
                     break;
-                case 3:
-                    Updatewinending();
-                    break;
+               
             }
 
             base.Update(gameTime);
@@ -223,9 +256,7 @@ namespace Slutprojekt
                 case 2:
                     Drawloseending();
                     break;
-                case 3:
-                    Drawwinending();
-                    break;
+               
             }
 
             base.Draw(gameTime);
@@ -288,6 +319,8 @@ namespace Slutprojekt
                 SwitchScene(2);
 
             }
+
+            
         }
 
 
@@ -337,7 +370,7 @@ namespace Slutprojekt
             else
             {
 
-                greenshotrect.Y += greenshotspeed;
+                greenshotrect.Y += greenshotspeed + (level * 2);
 
             }
 
@@ -389,7 +422,7 @@ namespace Slutprojekt
                 if (temp.X > 0 || temp.X <(windowWidth - temp.Width))
                 {
 
-                    temp.X += moveX;
+                    temp.X += moveX + (level * 2);
 
                     tiefighterPositioner[i] = temp;
 
@@ -447,14 +480,106 @@ namespace Slutprojekt
 
         }
 
+        protected void RedrawTiefigther()
+        {
+
+            for (int x = 0; x < 13; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    tiefighterPositioner.Add(new Rectangle(200 + 120 * x, 200 + 120 * y, 64, 64));
+                }
+            }
+
+        }
+
+        void Reset()
+        {
+
+            tiefighterPositioner.Clear();
+            Showlevel = 1;
+            level = 2;
+            Shiplives = 3;
+
+            //tiefigthers
+            for (int x = 0; x < 13; x++)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    tiefighterPositioner.Add(new Rectangle(200 + 120 * x, 200 + 120 * y, 64, 64));
+                }
+            }
+
+            //lives
+            for (int a = 0; a < Shiplives; a++)
+            {
+
+                XwingRectangleLives.Add(new Rectangle((windowWidth - 60 - (a * 50)), 25, 40, 40));
+
+            }
+
+            Shotrect = new Rectangle(0, -100, Shot.Width * 1, Shot.Height * 1);
+
+            greenshotrect = new Rectangle(-100, -100, Shot.Width * 1, Shot.Height * 1);
+
+        }
+
         void Updategame()
         {
 
             MoveShot();
             FireShot();
             Intersecttiefighter();
-            Tiefigthershoting();
             Intersectplayer();
+
+            if (tiefighterPositioner.Count != 0)
+            {
+
+                Tiefigthershoting();
+
+                //timer x
+                if (moveXtimer >= 60)
+                {
+
+                    TiefightermoveX();
+                    moveXtimer = 0;
+
+                }
+
+                moveXtimer++;
+
+                //timer y
+                if (moveYtimer >= 75)
+                {
+
+                    TiefightermoveY();
+                    moveYtimer = 0;
+
+                }
+
+                moveYtimer++;
+
+            }
+
+            //level
+            if (tiefighterPositioner.Count == 0)
+            {
+
+                RedrawTiefigther();
+                level++;
+                Showlevel++;
+                Score += 200;
+                
+
+            }
+
+            //shotspeed buff for admin
+            if (tangentbord.IsKeyDown(Keys.K))
+            {
+
+                shotspeed = 80;
+
+            }
 
             //xwing movement
             checktangentbord = tangentbord;
@@ -479,40 +604,29 @@ namespace Slutprojekt
             //score
             meddelande = $"Score: {Score}";
 
-            //timer x
-            if (moveXtimer >= 60)
-            {
+            //level
+            levelmeddelande = $"Level: {Showlevel}";
 
-                TiefightermoveX();
-                moveXtimer = 0;
 
-            }
-            
-            moveXtimer++;
-
-            //timer y
-            if (moveYtimer >= 75)
-            {
-
-                TiefightermoveY();
-                moveYtimer = 0 ;
-
-            }
-
-            moveYtimer++;
         }
 
         void Updateloseending()
         {
 
+            if (VänsterMusTryckt() && Yesknapprect.Contains(mus.Position))
+            {
 
+                Reset();
+                SwitchScene(1);
 
-        }
+            }
 
-        void Updatewinending()
-        {
+            if (VänsterMusTryckt() && Noknapprect.Contains(mus.Position))
+            {
 
+                Exit();
 
+            }
 
         }
 
@@ -544,6 +658,7 @@ namespace Slutprojekt
             _spriteBatch.Draw(Shot, Shotrect, Color.White);
             _spriteBatch.Draw(xwingbild, xwingRectangle, Color.White);
             _spriteBatch.DrawString(arialFont, meddelande, meddelandePosition, Color.White);
+            _spriteBatch.DrawString(arialFontlevel, levelmeddelande, LevelPosition, Color.White);
 
             foreach (Rectangle tiefighterRectangle in tiefighterPositioner)
             {
@@ -568,24 +683,14 @@ namespace Slutprojekt
 
             _spriteBatch.Draw(Spacebild, Spacepos, Color.White);
             _spriteBatch.Draw(Spacebild2, Spacepos2, Color.White);
+            _spriteBatch.Draw(GameOver, GameOverRect, Color.White);
+            _spriteBatch.DrawString(arialFontPlayagain, Playagainmeddelande, PlayagainPosition, Color.White);
+            _spriteBatch.Draw(Yesknappbild, Yesknapprect, Color.White);
+            _spriteBatch.Draw(Noknappbild, Noknapprect, Color.White);
 
             _spriteBatch.End();
 
         }
 
-        void Drawwinending()
-        {
-
-            GraphicsDevice.Clear(Color.CornflowerBlue);
-
-            _spriteBatch.Begin();
-
-            _spriteBatch.Draw(Spacebild, Spacepos, Color.White);
-            _spriteBatch.Draw(Spacebild2, Spacepos2, Color.White);
-
-            _spriteBatch.End();
-
-
-        }
     }
 }

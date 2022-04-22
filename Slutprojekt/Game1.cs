@@ -500,6 +500,7 @@ namespace Slutprojekt
             Showlevel = 1;
             level = 2;
             Shiplives = 3;
+            Score = 0;
 
             //tiefigthers
             for (int x = 0; x < 13; x++)
@@ -687,6 +688,7 @@ namespace Slutprojekt
             _spriteBatch.DrawString(arialFontPlayagain, Playagainmeddelande, PlayagainPosition, Color.White);
             _spriteBatch.Draw(Yesknappbild, Yesknapprect, Color.White);
             _spriteBatch.Draw(Noknappbild, Noknapprect, Color.White);
+            _spriteBatch.DrawString(arialFont, meddelande, meddelandePosition, Color.White);
 
             _spriteBatch.End();
 
